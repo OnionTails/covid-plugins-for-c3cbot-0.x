@@ -3,7 +3,7 @@
 	"plugin_scope": "covid19",
 	"plugin_exec": "covid19.js",
 	"command_map": {
-		"covid": {
+		"covidimg": {
 			"hargs": {
 				"vi_VN": "",
 				"en_US": ""
