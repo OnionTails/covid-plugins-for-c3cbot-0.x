@@ -3,7 +3,7 @@
 	"plugin_scope": "covid19",
 	"plugin_exec": "covid19.js",
 	"command_map": {
-		"covidimg": {
+		"covid": {
 			"hargs": {
 				"vi_VN": "",
 				"en_US": ""
@@ -31,7 +31,7 @@
 	"file_map": {
 		"images/gradient.png": "gradient",
 		"images/flag.png": "flag",
-		"font/esl.ttf": "esl"
+		"font/arial.ttf": "arial"
 	},
 	"complied_for": "0.3.0"
 }

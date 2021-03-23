@@ -2,10 +2,10 @@ var fetch = global.nodemodule['node-fetch'];
 var merge = global.nodemodule['merge-images'];
 var fs = global.nodemodule['fs'];
 var path = global.nodemodule['path'];
-var {Canvas , Image} = global.nodemodule['canvas'];
+var { Canvas, Image } = global.nodemodule['canvas'];
 var text2png = global.nodemodule['text2png'];
-var datetime = global.nodemodule['luxon'];
-var waiton = global.nodemodule['wait-on']
+var DateTime = global.nodemodule['Luxon'];
+var waiton = global.nodemodule['wait-on'];
 var time = new Date()
 
 function ensureExists(path, mask) {
@@ -23,27 +23,17 @@ function ensureExists(path, mask) {
     }
 }
 
-var rootpath = path.resolve(__dirname, "..", "markgei-data");
+var rootpath = path.resolve(__dirname, "..", "covid-data");
 ensureExists(rootpath);
 ensureExists(path.join(rootpath, "temp"));
 ensureExists(path.join(rootpath, "images"));
 ensureExists(path.join(rootpath, "font"));
 
-var img = 'https://raw.githubusercontent.com/CuSO4-c3c/covid-plugins-for-c3cbot-0.x/main/images/gradient.png'
-var gradientc = await fetch(img)
-await fs.writeFileSync(path.join(rootpath, "images", 'gradient.png'), gradientc)
-var font = 'https://raw.githubusercontent.com/CuSO4-c3c/covid-plugins-for-c3cbot-0.x/main/font/esl.ttf'
-var fontc = await fetch(font)
-await fs.writeFileSync(path.join(rootpath, 'font', 'esl.ttf'), fontc)
-var fimg = 'https://raw.githubusercontent.com/CuSO4-c3c/covid-plugins-for-c3cbot-0.x/main/images/flag.png'
-var fimgc = await fetch(fimg)
-fs.writeFileSync(path.join(rootpath, "images", 'flag.png'), fimgc)
-
 var nameMapping = {
     "gradient": path.join(rootpath, "images", 'gradient.png'),
-    "esl": path.join(rootpath, 'font', 'esl.ttf'),
+    "arial": path.join(rootpath, 'font', 'arial.ttf'),
     "flag": path.join(rootpath, 'images', 'flag.png')
-} 
+}
 
 for (var n in nameMapping) {
     if (!fs.existsSync(nameMapping[n])) {
@@ -51,73 +41,94 @@ for (var n in nameMapping) {
     }
 }
 
-var covid19 = async function(type, data) {
-    var dt = datetime.now()
+var covid19 = async function (type, data) {
+    if (!fs.existsSync(path.join(rootpath, "images", 'gradient.png'))) {
+        var img = 'https://raw.githubusercontent.com/CuSO4-c3c/covid-plugins-for-c3cbot-0.x/main/images/gradient.png'
+        var gradientc = await fetch(img)
+        var gradientc = await gradientc.buffer()
+        fs.writeFileSync(path.join(rootpath, "images", 'gradient.png'), gradientc)
+    }
+    if (!fs.existsSync(path.join(rootpath, 'font', 'arial.ttf'))) {
+        var font = 'https://raw.githubusercontent.com/CuSO4-c3c/covid-plugins-for-c3cbot-0.x/main/font/arial.ttf'
+        var fontc = await fetch(font)
+        var fontc = await fontc.buffer()
+        fs.writeFileSync(path.join(rootpath, 'font', 'arial.ttf'), fontc)
+    }
+    if (!fs.existsSync(path.join(rootpath, "images", 'flag.png'))) {
+        var fimg = 'https://raw.githubusercontent.com/CuSO4-c3c/covid-plugins-for-c3cbot-0.x/main/images/flag.png'
+        var fimgc = await fetch(fimg)
+        var fimgc = await fimgc.buffer()
+        fs.writeFileSync(path.join(rootpath, "images", 'flag.png'), fimgc)
+    }
+    /*
+    var dt = DateTime.local()
     var d = dt.day()
     var m = dt.month()
     var y = dt.year()
     var h = dt.hour()
     var mi = dt.minute()
     var cdt = d + '/' + m + '/' + y + ' | ' + h + ':' + mi
+    */
+   var cdt = Date.now()
     var infimg = 'inf_' + Date.now() + '.png'
     var trtimg = 'trt_' + Date.now() + '.png'
     var recimg = 'rec_' + Date.now() + '.png'
     var decimg = 'dec_' + Date.now() + '.png'
     var succ = 'succ_' + Date.now() + '.png'
     var api = 'https://api.apify.com/v2/key-value-stores/EaCBL1JNntjR3EakU/records/LATEST?disableRedirect=true'
-    var data = await fetch(api);
-    var str = await data.text() 
+    var datas = await fetch(api);
+    var str = await datas.text()
     var jdata = await JSON.parse(str);
     var inf = jdata.infected;
     var trt = jdata.treated;
     var rec = jdata.recovered;
     var dec = jdata.deceased;
-    fs.writeFileSync(path.join(rootpath, 'temp', 'vn.png'),text2png('VIETNAM', {
+    await fs.writeFileSync(path.join(rootpath, 'temp', 'vn.png'), text2png('VIETNAM', {
         color: '#ffffff',
-        font: '46px ESLUnicode',
-        localFontPath: path.join(rootpath, 'font', 'esl.ttf'),
-        localFontName: 'ESLUnicode'
+        font: '50px Arial',
+        localFontPath: path.join(rootpath, 'font', 'arial.ttf'),
+        localFontName: 'Arial'
     }));
-    fs.writeFileSync(path.join(rootpath, 'temp', 'ex.png'),text2png('COVID-19 STATS', {
+    await fs.writeFileSync(path.join(rootpath, 'temp', 'ex.png'), text2png('COVID-19 STATS', {
         color: '#ffffff',
-        font: '42px ESLUnicode',
-        localFontPath: path.join(rootpath, 'font', 'esl.ttf'),
-        localFontName: 'ESLUnicode'
+        font: '27px Arial',
+        localFontPath: path.join(rootpath, 'font', 'arial.ttf'),
+        localFontName: 'Arial'
     }));
-    fs.writeFileSync(path.join(rootpath, 'temp', infimg),text2png(`${inf}\nCASES`, {
+    await fs.writeFileSync(path.join(rootpath, 'temp', infimg), text2png(`${inf}\nCASES`, {
         color: '#ffffff',
-        font: '44px ESLUnicode',
-        localFontPath: path.join(rootpath, 'font', 'esl.ttf'),
-        localFontName: 'ESLUnicode',
-        lineSpacing: '6'
+        font: '50px Arial',
+        localFontPath: path.join(rootpath, 'font', 'arial.ttf'),
+        localFontName: 'Arial',
+        lineSpacing: 6
     }));
-    fs.writeFileSync(path.join(rootpath, 'temp', trtimg),text2png(`${trt}\nBEING TREATEDs`, {
+    await fs.writeFileSync(path.join(rootpath, 'temp', trtimg), text2png(`${trt}\nBEING TREATEDS`, {
         color: '#ffffff',
-        font: '44px ESLUnicode',
-        localFontPath: path.join(rootpath, 'font', 'esl.ttf'),
-        localFontName: 'ESLUnicode',
-        lineSpacing: '6'
+        font: '50px Arial',
+        localFontPath: path.join(rootpath, 'font', 'arial.ttf'),
+        localFontName: 'Arial',
+        lineSpacing: 6
     }));
-    fs.writeFileSync(path.join(rootpath, 'temp', recimg),text2png(`${rec}\nRECOVERED`, {
+    await fs.writeFileSync(path.join(rootpath, 'temp', recimg), text2png(`${rec}\nRECOVERED`, {
         color: '#ffffff',
-        font: '44px ESLUnicode',
-        localFontPath: path.join(rootpath, 'font', 'esl.ttf'),
-        localFontName: 'ESLUnicode',
-        lineSpacing: '6'
+        font: '50px Arial',
+        localFontPath: path.join(rootpath, 'font', 'arial.ttf'),
+        localFontName: 'Arial',
+        lineSpacing: 6
     }));
-    fs.writeFileSync(path.join(rootpath, 'temp', decimg),text2png(`${dec}\nDEATHS`, {
+    await fs.writeFileSync(path.join(rootpath, 'temp', decimg), text2png(`${dec}\nDEATHS`, {
         color: '#ffffff',
-        font: '44px ESLUnicode',
-        localFontPath: path.join(rootpath, 'font', 'esl.ttf'),
-        localFontName: 'ESLUnicode',
-        lineSpacing: '6'
+        font: '50px Arial',
+        localFontPath: path.join(rootpath, 'font', 'arial.ttf'),
+        localFontName: 'Arial',
+        lineSpacing: 6
     }));
-    fs.writeFileSync(path.join(rootpath, 'temp', 'date.png'),text2png(`NGUỒN: HTTPS://NCOV.MOH.GOV.VN \n THỜI GIAN: ${cdt}`, {
+    await fs.writeFileSync(path.join(rootpath, 'temp', 'date.png'), text2png(`NGUỒN: HTTPS://NCOV.MOH.GOV.VN \nTHỜI GIAN: ${cdt}`, {
         color: '#ffffff',
-        font: '17px ESLUnicode',
-        localFontPath: path.join(rootpath, 'font', 'esl.ttf'),
-        localFontName: 'ESLUnicode',
-        lineSpacing: '15'
+        font: '20px Arial',
+        localFontPath: path.join(rootpath, 'font', 'arial.ttf'),
+        localFontName: 'Arial',
+        lineSpacing: 3
     }));
     waiton({
         resources: [
@@ -129,8 +140,8 @@ var covid19 = async function(type, data) {
             path.join(rootpath, 'temp', 'ex.png'),
             path.join(rootpath, 'temp', 'date.png'),
         ],
-        timeout: 7000
-    }).then(function(){
+        timeout: 5000
+    }).then(function () {
         merge([
             {
                 src: path.join(rootpath, 'images', 'gradient.png'),
@@ -143,64 +154,71 @@ var covid19 = async function(type, data) {
             {
                 src: path.join(rootpath, 'temp', 'ex.png'),
                 x: 41,
-                y: 87
+                y: 75
             },
             {
                 src: path.join(rootpath, 'temp', 'date.png'),
-                x: 941,
+                x: 831,
                 y: 39
             },
             {
                 src: path.join(rootpath, 'images', 'flag.png'),
-                x: 234,
-                y: 34
+                x: 274,
+                y: 33
             },
             {
                 src: path.join(rootpath, 'temp', infimg),
-                x: 269,
+                x: 209,
                 y: 267
             },
             {
                 src: path.join(rootpath, 'temp', recimg),
-                x: 269,
-                y: 433
-            }, 
+                x: 209,
+                y: 463
+            },
             {
                 src: path.join(rootpath, 'temp', trtimg),
-                x: 768,
+                x: 688,
                 y: 267
             },
             {
                 src: path.join(rootpath, 'temp', decimg),
-                x: 768,
-                y: 433
-            }],{
-                Canvas: Canvas,
-                Image: Image
-            }).then(function(res){
+                x: 688,
+                y: 463
+            }], {
+            Canvas: Canvas,
+            Image: Image
+        }).then(function (res) {
             fs.writeFile(
-                path.join(rootpath, "temp", succ), 
-                res.replace(/^data:image\/png;base64,/, ""), 
-                'base64', 
+                path.join(rootpath, "temp", succ),
+                res.replace(/^data:image\/png;base64,/, ""),
+                'base64',
                 function (err) {
-                    
-                if (err) data.log(err);
-                
+
+                    if (err) data.log(err);
+
                     var img = fs.createReadStream(path.join(rootpath, "temp", succ));
-                    
+
                     data.return({
-                        handler: "internal-raw",
+                        handler: "internal",
                         data: {
                             body: "",
                             attachment: ([img])
                         }
                     });
                     img.on("close", () => {
-                    try {
-                    fs.unlinkSync(path.join(rootpath, "temp"));
-                    } catch (err) {}
+                        try {
+                            fs.unlinkSync(path.join(rootpath, "temp", decimg));
+                            fs.unlinkSync(path.join(rootpath, "temp", trtimg));
+                            fs.unlinkSync(path.join(rootpath, "temp", recimg));
+                            fs.unlinkSync(path.join(rootpath, "temp", infimg));
+                            fs.unlinkSync(path.join(rootpath, "temp", succ));
+                            fs.unlinkSync(path.join(rootpath, "temp", 'vn.png'));
+                            fs.unlinkSync(path.join(rootpath, "temp", 'ex.png'));
+                            fs.unlinkSync(path.join(rootpath, "temp", 'date.png'));
+                        } catch (err) { }
                     })
-            });
+                });
         })
     })
 }
