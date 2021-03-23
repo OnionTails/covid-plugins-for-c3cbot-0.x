@@ -4,9 +4,13 @@ var fs = global.nodemodule['fs'];
 var path = global.nodemodule['path'];
 var { Canvas, Image } = global.nodemodule['canvas'];
 var text2png = global.nodemodule['text2png'];
-var DateTime = global.nodemodule['Luxon'];
+/*
+var rootpatha = path.resolve(__dirname, "..",'nodemodules', 'node_modules', 'luxon', 'src')
+const DateTime = require(path.join(rootpatha, 'luxon.js'))
+*/
+var DateTime = global.nodemodule['luxon']
 var waiton = global.nodemodule['wait-on'];
-var time = new Date()
+var time = new Date().getTime()
 
 function ensureExists(path, mask) {
     if (typeof mask != "number") {
@@ -60,16 +64,29 @@ var covid19 = async function (type, data) {
         var fimgc = await fimgc.buffer()
         fs.writeFileSync(path.join(rootpath, "images", 'flag.png'), fimgc)
     }
-    /*
-    var dt = DateTime.local()
-    var d = dt.day()
-    var m = dt.month()
-    var y = dt.year()
-    var h = dt.hour()
-    var mi = dt.minute()
-    var cdt = d + '/' + m + '/' + y + ' | ' + h + ':' + mi
-    */
-   var cdt = Date.now()
+    var dt = Date(time)
+    console.log(dt)
+    var cdt = dt.toString()
+    var d = cdt.slice(8,10)
+    var mt = cdt.slice(4,7)
+    switch(mt) {
+        case 'Jan': {var m = '01'}  break;
+        case 'Feb': {var m = '02'}  break;
+        case 'Mar': {var m = '03'}  break;
+        case 'Apr': {var m = '04'}  break;
+        case 'May': {var m = '05'}  break;
+        case 'Jun': {var m = '06'}  break;
+        case 'Jul': {var m = '07'}  break;
+        case 'Aug': {var m = '08'}  break;
+        case 'Sep': {var m = '09'}  break;
+        case 'Oct': {var m = '10'}  break;
+        case 'Nov': {var m = '11'}  break;
+        case 'Dec': {var m = '12'}  break;
+    }
+    var y = cdt.slice(11,15)
+    var t = cdt.slice(16,21)
+    var tz = `(${cdt.slice(25,31)})`
+    var ccdt = d + '/' + m + '/' + y + ' | ' + t +` ${tz}`
     var infimg = 'inf_' + Date.now() + '.png'
     var trtimg = 'trt_' + Date.now() + '.png'
     var recimg = 'rec_' + Date.now() + '.png'
@@ -123,7 +140,7 @@ var covid19 = async function (type, data) {
         localFontName: 'Arial',
         lineSpacing: 6
     }));
-    await fs.writeFileSync(path.join(rootpath, 'temp', 'date.png'), text2png(`NGUỒN: HTTPS://NCOV.MOH.GOV.VN \nTHỜI GIAN: ${cdt}`, {
+    await fs.writeFileSync(path.join(rootpath, 'temp', 'date.png'), text2png(`NGUỒN: HTTPS://NCOV.MOH.GOV.VN \nTHỜI GIAN: ${ccdt}`, {
         color: '#ffffff',
         font: '20px Arial',
         localFontPath: path.join(rootpath, 'font', 'arial.ttf'),
@@ -140,7 +157,7 @@ var covid19 = async function (type, data) {
             path.join(rootpath, 'temp', 'ex.png'),
             path.join(rootpath, 'temp', 'date.png'),
         ],
-        timeout: 5000
+        timeout: 7000
     }).then(function () {
         merge([
             {
